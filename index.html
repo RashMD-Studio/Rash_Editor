@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <title>Rash Editor — استودیو پیکسل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&family=JetBrains+Mono&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <span class="brand">Rash editor</span>
+    <button id="mNew">جدید</button>
+    <button id="mOpen">باز کردن تصویر</button>
+    <button id="mUndo" title="برگشت (Ctrl+Z)" aria-label="برگشت (Ctrl+Z)" disabled>برگشت</button>
+    <button id="mRedo" title="جلو (Ctrl+Y یا Ctrl+Shift+Z)" aria-label="جلو (Ctrl+Y یا Ctrl+Shift+Z)" disabled>جلو</button>
+    <button id="mFit">متناسب با صفحه</button>
+    <button id="m100">۱۰۰٪</button>
+    <span class="sp"></span>
+    <button id="mExport" class="primary">ذخیره تصویر</button>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+
+  <div id="opts"></div>
+
+  <div id="tools" role="toolbar" aria-label="ابزارها">
+    <button data-tool="move" title="جابجایی لایه (V)"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></button>
+    <button data-tool="brush" title="قلم‌مو (B)"><svg viewBox="0 0 24 24"><path d="M18 3l3 3-9 9-3-3zM9 12c-3 0-4 2-4 4 0 2-1 3-2 4 3 1 8 0 8-5"/></svg></button>
+    <button data-tool="eraser" title="پاک‌کن (E)"><svg viewBox="0 0 24 24"><path d="M4 16l9-11 7 6-8 9H7zM9 20h11"/></svg></button>
+    <button data-tool="fill" title="سطل رنگ (G)"><svg viewBox="0 0 24 24"><path d="M5 11l7-7 7 7-7 7zM19 15c1 2 2 3 2 4a2 2 0 01-4 0c0-1 1-2 2-4z"/></svg></button>
+    <button data-tool="picker" title="قطره‌چکان (I)"><svg viewBox="0 0 24 24"><path d="M15 4l5 5-3 1-7 7-4 1 1-4 7-7zM4 20l3-3"/></svg></button>
+    <button data-tool="rect" title="مستطیل (R)"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12"/></svg></button>
+    <button data-tool="ellipse" title="بیضی (O)"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="6"/></svg></button>
+    <button data-tool="line" title="خط (L)"><svg viewBox="0 0 24 24"><path d="M5 19L19 5"/></svg></button>
+    <button data-tool="text" title="متن (T)"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg></button>
+    <button data-tool="crop" title="برش (C)"><svg viewBox="0 0 24 24"><path d="M7 2v15h15M2 7h15v15"/></svg></button>
+    <button data-tool="watermark" title="حذف واترمارک: روی ناحیه بکشید"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16M7 4v16M12 4v16M17 4v16"/><path d="M5 5l14 14" stroke="#ff5252"/></svg></button>
+    <button data-tool="hand" title="دست / حرکت صفحه (H)"><svg viewBox="0 0 24 24"><path d="M8 12V6a1.5 1.5 0 013 0v5M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v7c0 4-2 7-6 7-3 0-4-2-6-5l-1-2a1.5 1.5 0 012-2l2 2"/></svg></button>
+    <div class="swatches" title="رنگ جلو / پس‌زمینه">
+      <input type="color" id="fg" value="#e8483c" aria-label="رنگ اصلی">
+      <input type="color" id="bg2" value="#ffffff" aria-label="رنگ دوم">
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="view"></canvas>
+    <input id="textbox" type="text" aria-label="متن">
+  </div>
+
+  <aside id="side">
+    <div class="sec">
+      <h3>تنظیمات تصویر (روی لایه فعال)</h3>
+      <div class="row"><span>روشنایی</span><input type="range" id="fBr" min="-100" max="100" value="0"><output></output></div>
+      <div class="row"><span>کنتراست</span><input type="range" id="fCo" min="-100" max="100" value="0"><output></output></div>
+      <div class="row"><span>اشباع</span><input type="range" id="fSa" min="-100" max="100" value="0"><output></output></div>
+      <div class="row"><span>چرخش رنگ</span><input type="range" id="fHu" min="-180" max="180" value="0"><output></output></div>
+      <div class="row"><span>محو</span><input type="range" id="fBl" min="0" max="20" value="0"><output></output></div>
+      <div class="btns">
+        <button id="fApply" class="primary">اعمال</button>
+        <button id="fReset">بازنشانی</button>
+      </div>
+      <div class="btns">
+        <button data-fx="gray">سیاه‌وسفید</button>
+        <button data-fx="sepia">قدیمی</button>
+        <button data-fx="invert">معکوس</button>
+        <button data-fx="sharpen">تیز</button>
+        <button data-fx="flipH">قرینه افقی</button>
+        <button data-fx="flipV">قرینه عمودی</button>
+        <button data-fx="rotate">چرخش ۹۰°</button>
+      </div>
+    </div>
+    <div class="sec" id="layersec">
+      <h3>لایه‌ها</h3>
+      <div id="layerctl">
+        <select id="blend" aria-label="حالت ترکیب">
+          <option value="source-over">عادی</option><option value="multiply">ضرب</option><option value="screen">صفحه</option>
+          <option value="overlay">همپوشانی</option><option value="darken">تیره‌تر</option><option value="lighten">روشن‌تر</option>
+          <option value="difference">تفاضل</option><option value="soft-light">نور ملایم</option>
+        </select>
+        <input type="range" id="lop" min="0" max="100" value="100" aria-label="شفافیت لایه" style="width:80px">
+        <output id="lopv" style="width:34px;font-family:var(--font-mono);font-size:11px">100</output>
+      </div>
+      <div id="layers"></div>
+      <div id="layeract">
+        <button id="lAdd">+ لایه</button>
+        <button id="lDup">کپی</button>
+        <button id="lUp">↑</button>
+        <button id="lDown">↓</button>
+        <button id="lMerge">ادغام ↓</button>
+        <button id="lDel">حذف</button>
+      </div>
+    </div>
+  </aside>
+
+  <div id="status"><span id="sPos">x: – y: –</span><span id="sSize"></span><span id="sZoom"></span><span id="sTool"></span></div>
+</div>
+
+<div id="toast" role="status"></div>
+<div id="dlg"><div class="box" id="dlgBox"></div></div>
+
+
+  <script src="js/core.js"></script>
+  <script src="js/history-view.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/layers-panel.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/watermark.js"></script>
+  <script src="js/pointer.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/layer-actions.js"></script>
+  <script src="js/files.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
